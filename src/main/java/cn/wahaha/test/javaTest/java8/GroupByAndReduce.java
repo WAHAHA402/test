@@ -28,6 +28,7 @@ public class GroupByAndReduce {
         Stream<Locale> locale = Stream.of(Locale.getAvailableLocales());
         Map<Boolean, List<Locale>> englishAndOtherLocales = locale.collect(
                 Collectors.partitioningBy(locale1 -> locale1.getLanguage().equals("en")));
+
         List<Locale> locales = englishAndOtherLocales.get(true);
         System.out.println(locales);
         System.out.println(englishAndOtherLocales.get(false));

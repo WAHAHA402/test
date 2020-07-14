@@ -13,9 +13,9 @@ public class TestBiFunction {
     }
 
     public static void main(String[] args) {
-        String zz = doSomething(10, 9, (Integer x, Integer y) -> {
+        String zz = doSomething(10, 9, (x, y) -> {
             int z = x + y;
-            System.out.println(String.valueOf(z));
+            System.out.println(z);
             return String.valueOf(z);
         });
         System.out.println(zz);

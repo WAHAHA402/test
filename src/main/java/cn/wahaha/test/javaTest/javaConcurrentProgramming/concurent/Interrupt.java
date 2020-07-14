@@ -1,4 +1,4 @@
-package cn.wahaha.test.javaTest.javaConcurrentProgramming.bingfa;
+package cn.wahaha.test.javaTest.javaConcurrentProgramming.concurent;
 
 /**
  * @Description: java核心技术14章 14.2中断线程

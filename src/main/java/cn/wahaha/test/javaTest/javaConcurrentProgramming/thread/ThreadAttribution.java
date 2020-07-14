@@ -18,7 +18,7 @@ public class ThreadAttribution {
 //          uncaughtException()
 //        };
         Account account = null;
-        System.out.println(account.getBalance());
+//        System.out.println(account.getBalance());
     };
 
     public static void main(String[] args) {
