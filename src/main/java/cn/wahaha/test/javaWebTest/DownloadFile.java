@@ -1,12 +1,17 @@
 package cn.wahaha.test.javaWebTest;
 
+import cn.wahaha.test.javaWebTest.model.UserDO;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.*;
+import java.net.URLEncoder;
 
 /**
  * @Description: DownloadFile
@@ -25,12 +30,12 @@ public class DownloadFile {
 //        File TrxFiles[] = scFileDir.listFiles();
 //        System.out.println(TrxFiles[0]);
 //        String fileName = TrxFiles[0].getName(); //下载的文件名
-        String fileName = "123.jpg";
+        String fileName = "123.png";
 
         // 如果文件名不为空，则进行下载
 //        if (fileName != null) {
         //设置文件下载路径
-        String realPath = "https://segmentfault.com/img/remote/1460000015559589";
+        String realPath = "/Users/zhangrenwei/Downloads/1234567.png";
 //            File file = new File(realPath, fileName);
         File file = new File(realPath);
 
@@ -41,7 +46,7 @@ public class DownloadFile {
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream");
         // 下载文件能正常显示中文
-//                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
 
 
         // 实现文件下载
@@ -79,5 +84,11 @@ public class DownloadFile {
 //            }
 //        }
         return null;
+    }
+
+    @PostMapping("/yo")
+    public String validTest(@RequestBody @Valid UserDO userDO) {
+        System.out.println(userDO.getAge() + " --- " + userDO.getUsername());
+        return "Success";
     }
 }
