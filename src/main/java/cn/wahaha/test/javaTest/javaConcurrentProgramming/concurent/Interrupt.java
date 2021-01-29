@@ -1,5 +1,8 @@
 package cn.wahaha.test.javaTest.javaConcurrentProgramming.concurent;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * @Description: java核心技术14章 14.2中断线程
  * @Author: zhangrenwei
@@ -34,17 +37,18 @@ public class Interrupt {
           //sleep join wait等方法都会跑出InterruptedException异常，这个异常是因为调用interrupt方法导致的
           System.out.println("very well, it caused a InterruptedException");
       }
-      catch (Exception e) {
-          System.out.println("exception");
-      }
-      finally {
-
-      }
+//      catch (Exception e) {
+//          System.out.println("exception");
+//      }
+//      finally {
+//
+//      }
     };
 
     public static void main(String[] args) throws InterruptedException {
-        Interrupt i = new Interrupt();
-        Thread thread = new Thread(i.runnable);
-        thread.start();
+//        Interrupt i = new Interrupt();
+//        Thread thread = new Thread(i.runnable);
+//        thread.start();
+        Lock lock = new ReentrantLock(true);
     }
 }

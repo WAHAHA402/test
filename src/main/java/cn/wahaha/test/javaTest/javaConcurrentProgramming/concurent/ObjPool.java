@@ -1,7 +1,6 @@
 package cn.wahaha.test.javaTest.javaConcurrentProgramming.concurent;
 
 import java.util.List;
-import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Semaphore;
 import java.util.function.Function;
@@ -50,8 +49,8 @@ public class ObjPool<T, R> {
 
     public static void main(String[] args) {
         //创建对象池
-        ObjPool<Long, Integer> objPool =
-                new ObjPool<Long, Integer>(5, (long) new Random().nextInt());
+        ObjPool objPool =
+                new ObjPool(5, "whatever string");
         Function function = t -> {
             System.out.println(t);
             try {
@@ -60,7 +59,7 @@ public class ObjPool<T, R> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            return Integer.valueOf(t.toString());
+            return t;
         };
 
         for (int i = 0; i < 10; i++) {
