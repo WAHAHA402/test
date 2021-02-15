@@ -9,7 +9,7 @@ import java.util.Stack;
  * @Date: 2019/11/17 6:26 下午
  */
 
-public class LinkedList {
+public class LinkedListPractice {
     /**
      * 链表结点
      */

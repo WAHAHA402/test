@@ -1,6 +1,8 @@
 package cn.wahaha.test.dataStructure;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 /**
@@ -80,24 +82,24 @@ public class BinaryTree {
          * 左子树的右子树和右子树的左子树相同即可，采用递归
          * 非递归也可，采用栈或队列存取各级子树根节点
          */
-        if (root == null) {
-            return true;
-        }
+        if (root == null) return true;
         return isLeftAndRightEquals(root.left, root.right);
     }
 
-    public boolean isLeftAndRightEquals(TreeNode left, TreeNode right) {
+    boolean isLeftAndRightEquals(TreeNode left, TreeNode right) {
         if (left == null && right == null) return true;
         if (left == null || right == null) return false;
 
-        return (left.val == right.val) && isLeftAndRightEquals(left.left, right.right) && isLeftAndRightEquals(left.right, right.left);
+        return left.val == right.val && isLeftAndRightEquals(left.left, right.right) && isLeftAndRightEquals(left.right, right.left);
     }
 
     //从上到下按层打印二叉树，同一层结点从左至右输出。每一层输出一行
+    /**
+     * 这个方法复杂低效，利用队列逻辑就会清楚很多
     ArrayList<ArrayList<Integer>> Print(TreeNode pRoot) {
         Integer treeDepth = treeDepth(pRoot);
         ArrayList<ArrayList<Integer>> treeValueList = new ArrayList<ArrayList<Integer>>(treeDepth);
-        if (treeDepth == 0) return null;
+        if (treeDepth == 0) return treeValueList;
 
         for (int i = 0; i < treeDepth; i++) {
             treeValueList.add(new ArrayList<Integer>());
@@ -116,6 +118,47 @@ public class BinaryTree {
 
         printALine(root.left, layer + 1, treeValueList, treeDepth);
         printALine(root.right, layer + 1, treeValueList, treeDepth);
+    }
+     **/
+    /**
+     * 这道题要用队列来做，先进先出
+     * @param pRoot
+     * @return
+     */
+    ArrayList<ArrayList<Integer> > Print(TreeNode pRoot) {
+        //返回的整数集合的集合
+        ArrayList<ArrayList<Integer>> arrayLists = new ArrayList<>();
+        if (pRoot == null) {
+            return arrayLists;
+        }
+        //利用队列来做到先进先出
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(pRoot);
+
+        //每次会将各个节点不为空的子节点加入队列，如果队列不空，则需要继续打印
+        while (!queue.isEmpty()) {
+            //这个size是要遍历的当前层的节点数的多少
+            int size = queue.size();
+            ArrayList<Integer> integers = new ArrayList<>();
+
+            for (int i = 0; i < size; i++) {
+                //每次取出一个元素，循环结束，则当前层的节点已经全部遍历结束
+                TreeNode node = queue.poll();
+
+                integers.add(node.val);
+
+                if (node.left != null) {
+                    queue.offer(node.left);
+                }
+                if (node.right != null) {
+                    queue.offer(node.right);
+                }
+            }
+
+            arrayLists.add(integers);
+        }
+
+        return arrayLists;
     }
 
     //给定一个二叉树和其中的一个结点，请找出中序遍历顺序的下一个结点并且返回。注意，树中的结点不仅包含左右子结点，同时包含指向父结点的指针。
