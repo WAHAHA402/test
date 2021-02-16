@@ -164,7 +164,7 @@ public class BinaryTree {
     //给定一个二叉树和其中的一个结点，请找出中序遍历顺序的下一个结点并且返回。注意，树中的结点不仅包含左右子结点，同时包含指向父结点的指针。
     public TreeLinkNode GetNext(TreeLinkNode pNode) {
         if (pNode == null) return null;
-
+        // 1 右节点不为空情况，中序遍历下一节点为右节点的最左节点
         if (pNode.right != null) {
             pNode = pNode.right;
             while (pNode.left != null) {
@@ -172,8 +172,38 @@ public class BinaryTree {
             }
             return pNode;
         }
-        while (pNode.next != null) {
-            if (pNode == pNode.next.left) {
+        // 2 右节点为空，（不包含跟节点）父节点不为空，当前节点是父节点的左节点时，下一节点为父节点
+        if (pNode.next != null && pNode == pNode.next.left) {
+            return pNode.next;
+        }
+        // 3 右节点为空，（不包含跟节点）父节点不为空，当前节点为父节点的右结点，向上遍历找到父结点为其本人父节点的左节点，此时下一结点为其本身的父结点
+        if (pNode.next != null) {
+            pNode = pNode.next;
+            while (pNode.next != null && pNode == pNode.next.right) {
+                pNode = pNode.next;
+            }
+            return pNode.next;
+        }
+
+        return null;
+    }
+
+    /**
+     * 这个方法是上面那个方法的简化版
+     * @param pNode
+     * @return
+     */
+    public TreeLinkNode GetNext2(TreeLinkNode pNode) {
+        if(pNode == null) return null;
+        if(pNode.right != null) {
+            pNode = pNode.right;
+            while (pNode.left != null) {
+                pNode = pNode.left;
+            }
+            return pNode;
+        }
+        while(pNode.next != null){
+            if(pNode == pNode.next.left){
                 return pNode.next;
             }
             pNode = pNode.next;
@@ -193,32 +223,8 @@ public class BinaryTree {
         }
     }
 
-    //从上往下打印出二叉树的每个节点，同层节点从左至右打印。
+    //从上往下打印出二叉树的每个节点，同层节点从左至右打印。这个方法借助队列是最好的方法，其他方法都很低效（说多了都是泪）
     //返回一个整数的list集合
-    public ArrayList<Integer> PrintFromTopToBottom(TreeNode root) {
-
-        ArrayList<Integer> integers = new ArrayList<>();
-
-        if (root == null) return integers;
-        ArrayList<ArrayList<Integer>> intArrayLists = new ArrayList<>();
-        printNode(root, 1, intArrayLists);
-
-        for (int i = 0; i < intArrayLists.size(); i++) {
-            integers.addAll(intArrayLists.get(i));
-        }
-        return integers;
-    }
-
-    void printNode(TreeNode treeNode, int depth, ArrayList<ArrayList<Integer>> intArrayLists) {
-        if (treeNode == null) return;
-        if (depth > intArrayLists.size()) {
-            intArrayLists.add(new ArrayList<>());
-        }
-        intArrayLists.get(depth - 1).add(treeNode.val);
-
-        printNode(treeNode.left, depth + 1, intArrayLists);
-        printNode(treeNode.right, depth + 1, intArrayLists);
-    }
 
     public ArrayList<Integer> PrintFromTopToBottomV2(TreeNode root) {
         ArrayList<Integer> integers = new ArrayList<>();
@@ -238,47 +244,30 @@ public class BinaryTree {
         return integers;
     }
 
-    //拓展二：二叉树的层次遍历，借助一个队列就可以了
-    //返回一个list的list集合
-    public ArrayList<ArrayList<Integer>> PrintFromTopToBottom_multiple_lines(TreeNode root) {
-        //存放结果
-        ArrayList<ArrayList<Integer>> arrayLists = new ArrayList<>();
-        if (root == null) return arrayLists;
-        //使用队列，先进先出
-        ArrayList<TreeNode> queue = new ArrayList();
-        //存放每行的列表
-        ArrayList<Integer> arrayList = new ArrayList<>();
-        //记录本层打印了多少个
-        int start = 0;
-        //记录下层要打印几个
-        int end = 1;
-        queue.add(root);
+    // 拓展二
+    public ArrayList<Integer> PrintFromTopToBottom2(TreeNode root) {
+        ArrayList<Integer> integers = new ArrayList<>();
+        if (root == null) return integers;
+
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
 
         while (!queue.isEmpty()) {
-            TreeNode treeNode = queue.remove(0);
-            //添加到本行的arrayList
-            arrayList.add(treeNode.val);
-            start++;
-            //每打印一个节点，就把此几点的下层左右节点放入队列
-            if (treeNode.left != null) {
-                queue.add(treeNode.left);
+            TreeNode node = queue.poll();
+            integers.add(node.val);
+
+            if (node.left != null) {
+                queue.offer(node.left);
             }
-            if (treeNode.right != null) {
-                queue.add(treeNode.right);
-            }
-            //判断本层是否打印完成
-            if (start == end) {
-                //此时的queue中存储的都是下一层的节点，即end即为queue的大小
-                end = queue.size();
-                start = 0;
-                arrayLists.add(arrayList);
-                //重置arrayList
-                arrayList = new ArrayList<>(end);
+            if (node.right != null) {
+                queue.offer(node.right);
             }
         }
 
-        return arrayLists;
+        return integers;
     }
+
+
 
 
     public ArrayList<ArrayList<Integer>> FindPath(TreeNode root, int target) {
@@ -513,27 +502,35 @@ public class BinaryTree {
         return treeNode;
     }
 
-    //将二叉树转换成一个双向链表
+    // 输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。要求不能创建任何新的结点，只能调整树中结点指针的指向。
+    // 这个题目要画个图，思考下就一目了然了（我真棒！）
+    // 递归思路。
+    // 第一步：左子树转成排序的双向链表（返回链表头），
+    // 第二步：右子树转成双向链表（返回链表头）；
+    // 第三步：将左子树的链表尾部和根结点连接，将右子树的链表头跟根结点连接
+    // PS: 二叉搜索树：左子树比根结点值小，右子树比根结点值大；左右子树各自右都是二叉搜索树
+
     public TreeNode Convert(TreeNode pRootOfTree) {
-        if (pRootOfTree == null) {
-            return null;
-        }
-        if (pRootOfTree.left == null && pRootOfTree.right == null) {
+        if(pRootOfTree == null || (pRootOfTree.left == null && pRootOfTree.right == null)) {
             return pRootOfTree;
         }
+        // 第一步
         TreeNode left = Convert(pRootOfTree.left);
-        TreeNode p = left;
-        while (p != null && p.right != null) {
-            p = p.right;
-        }
-        if (left != null) {
-            p.right = pRootOfTree;
-            pRootOfTree.left = p;
-        }
+        // 第二步
         TreeNode right = Convert(pRootOfTree.right);
+        // 第三步
+        TreeNode temp = left; // left 要保存起来返回
+        while (temp != null && temp.right != null) {
+            temp = temp.right;
+        }
+        if (temp != null) {
+            temp.right = pRootOfTree;
+            pRootOfTree.left = temp;
+        }
+
         if (right != null) {
-            pRootOfTree.right = right;
             right.left = pRootOfTree;
+            pRootOfTree.right = right;
         }
 
         return left == null ? pRootOfTree : left;
