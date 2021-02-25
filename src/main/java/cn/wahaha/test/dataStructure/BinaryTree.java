@@ -1,9 +1,6 @@
 package cn.wahaha.test.dataStructure;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * @Description: BinaryTree
@@ -268,8 +265,6 @@ public class BinaryTree {
     }
 
 
-
-
     public ArrayList<ArrayList<Integer>> FindPath(TreeNode root, int target) {
         ArrayList<ArrayList<Integer>> arrayLists = new ArrayList<>();
         if (root == null) return arrayLists;
@@ -312,96 +307,65 @@ public class BinaryTree {
 
     private ArrayList<ArrayList<Integer>> result = new ArrayList<>();
     private ArrayList<Integer> list = new ArrayList<>();
-
+    // 这道题还是得用递归做法
     public ArrayList<ArrayList<Integer>> FindPathV2(TreeNode root, int target) {
         if (root == null) return result;
+
         list.add(root.val);
         target -= root.val;
-        if (root.left == null && root.right == null && target == 0) {
+
+        if (target == 0 && root.left == null && root.right == null) {
             result.add(new ArrayList<>(list));
         }
+
         FindPathV2(root.left, target);
         FindPathV2(root.right, target);
-        list.remove(list.size() - 1);
+
         return result;
     }
 
-    //请实现一个函数按照"之"字形打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右至左的顺序打印，第三行按照从左到右的顺序打印，其他行以此类推。
+    /**
+     * 请实现一个函数按照"之"字形打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右至左的顺序打印，第三行按照从左到右的顺序打印，其他行以此类推。
+     * 解： 终于可以战胜这类题了，无论是多层打印、按"之"字形打印，其本质都是二叉树的层序遍历；借助其他的数据结构来辅助完成是比较好的选择，目前来看队列是最简单的实现方式
+     *      这道题，相较于按照每层从左到右打印，无非是多了一个反转。
+     *
+     */
     public ArrayList<ArrayList<Integer>> Print_之(TreeNode pRoot) {
         ArrayList<ArrayList<Integer>> arrayLists = new ArrayList<>();
-        if (pRoot == null) {
-            return arrayLists;
-        }
-
-        printByDepth(pRoot, 1, arrayLists);
-
-        //讲偶数层反转，面试时会说海量数据，根本行不通
-        for (int i = 0; i < arrayLists.size(); i++) {
-            if ((i - 1) % 2 == 0) {
-                ArrayList<Integer> integers = new ArrayList<>(arrayLists.get(i));
-                for (int j = 0; j < integers.size(); j++) {
-                    arrayLists.get(i).set(j, integers.get(integers.size() - 1 - j));
-                }
-            }
-        }
-
-        return arrayLists;
-    }
-
-    void printByDepth(TreeNode node, int depth, ArrayList<ArrayList<Integer>> arrayLists) {
-        if (node == null) return;
-        if (depth > arrayLists.size()) {
-            arrayLists.add(new ArrayList<>());
-        }
-        ArrayList<Integer> thisLayerNumber = arrayLists.get(depth - 1);
-        thisLayerNumber.add(node.val);
-
-        printByDepth(node.left, depth + 1, arrayLists);
-        printByDepth(node.right, depth + 1, arrayLists);
-    }
-
-    public ArrayList<ArrayList<Integer>> Print_之_V2(TreeNode pRoot) {
-
-        ArrayList<ArrayList<Integer>> arrayLists = new ArrayList<>();
         if (pRoot == null) return arrayLists;
-        Stack<TreeNode> oldStack = new Stack<>();
-        Stack<TreeNode> evenStack = new Stack<>();
-        int layer = 1;
-        oldStack.push(pRoot);
-        while (!(oldStack.isEmpty() && evenStack.isEmpty())) {
-            ArrayList<Integer> arrayList = new ArrayList<>();
-            if (layer % 2 != 0) {
-                while (!oldStack.isEmpty()) {
-                    TreeNode treeNode = oldStack.pop();
-                    if (treeNode != null) {
-                        arrayList.add(treeNode.val);
-                        evenStack.push(treeNode.left);
-                        evenStack.push(treeNode.right);
-                    }
-                }
-                if (!arrayList.isEmpty()) {
-                    arrayLists.add(arrayList);
-                    layer++;
-                }
-            } else {
-                while (!evenStack.isEmpty()) {
-                    TreeNode treeNode = evenStack.pop();
-                    if (treeNode != null) {
-                        arrayList.add(treeNode.val);
-                        oldStack.push(treeNode.right);
-                        oldStack.push(treeNode.left);
-                    }
-                }
-                if (!arrayList.isEmpty()) {
-                    arrayLists.add(arrayList);
-                    layer++;
-                }
 
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(pRoot);
+        boolean reverse = false;
+
+        while (!queue.isEmpty()) {
+            ArrayList<Integer> integers = new ArrayList<>();
+
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                TreeNode node = queue.poll();
+                // 如果使用下面注释掉的这个部分，for循环下面那个if方法就可以不用了；但是两者的效率哪个高还要对比下，都涉及到list数组的移动
+//                if(reverse){
+//                    integers.add(0, node.val);
+//                } else {
+                    integers.add(node.val);
+//                }
+
+                if (node.left != null) queue.offer(node.left);
+                if (node.right != null) queue.offer(node.right);
             }
+
+            if (reverse){
+                Collections.reverse(integers);
+            }
+            arrayLists.add(integers);
+            reverse = !reverse;
         }
 
         return arrayLists;
     }
+
+
 
     //输入某二叉树的前序遍历和中序遍历的结果，请重建出该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
     // 例如输入前序遍历序列{1,2,4,7,3,5,6,8}和中序遍历序列{4,7,2,1,5,3,8,6}，则重建二叉树并返回。
@@ -437,6 +401,24 @@ public class BinaryTree {
             }
         }
 
+        return root;
+    }
+
+    public TreeNode reConstructBinaryTreeV3(int[] pre, int[] in) {
+        if (pre.length == 0 || in.length == 0) {
+            return null;
+        }
+        TreeNode root = new TreeNode(pre[0]);
+        // 在中序中找到前序的根
+        for (int i = 0; i < in.length; i++) {
+            if (in[i] == pre[0]) {
+                // 左子树，注意 copyOfRange 函数，左闭右开
+                root.left = reConstructBinaryTreeV3(Arrays.copyOfRange(pre, 1, i + 1), Arrays.copyOfRange(in, 0, i));
+                // 右子树，注意 copyOfRange 函数，左闭右开
+                root.right = reConstructBinaryTreeV3(Arrays.copyOfRange(pre, i + 1, pre.length), Arrays.copyOfRange(in, i + 1, in.length));
+                break;
+            }
+        }
         return root;
     }
 
@@ -558,6 +540,151 @@ public class BinaryTree {
         }
 
         return left == null ? pRootOfTree : left;
+    }
+
+    /**
+     * 输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历的结果。如果是则返回true,否则返回false。假设输入的数组的任意两个数字都互不相同。
+     * 解答：
+     *      这道题其实比较好理解，画个图，回顾后序遍历的做法；利用递归，和上面那道根据前序遍历和中序遍历重建二叉树的题思路类似
+     */
+    public boolean helpVerify(int [] sequence, int start, int root){
+        if(start >= root)return true;
+        int key = sequence[root];
+        int i;
+        //找到左右子数的分界点
+        for(i=start; i < root; i++)
+            if(sequence[i] > key)
+                break;
+        //在右子树中判断是否含有小于root的值，如果有返回false
+        for(int j = i; j < root; j++)
+            if(sequence[j] < key)
+                return false;
+        return helpVerify(sequence, start, i-1) && helpVerify(sequence, i, root-1);
+    }
+    public boolean VerifySquenceOfBST(int [] sequence) {
+        if(sequence == null || sequence.length == 0)return false;
+        return  helpVerify(sequence, 0, sequence.length-1);
+
+    }
+
+    public boolean VerifySquenceOfBSTV2(int [] sequence) {
+        if (sequence == null || sequence.length == 0) {
+            return false;
+        }
+
+        if (sequence.length == 1) {
+            return true;
+        }
+
+        int root = sequence[sequence.length - 1];
+        int i;
+        for (i = 0; i < sequence.length - 1; i++) {
+            if (sequence[i] > root) {
+                break;
+            }
+        }
+
+        for (int j = i; j < sequence.length - 1; j++) {
+            if (sequence[j] < root) {
+                return false;
+            }
+        }
+
+        boolean left = true, right = true;
+        if (i > 0) {
+            left = VerifySquenceOfBST(Arrays.copyOfRange(sequence, 0, i));
+        }
+        if (i < sequence.length - 1) {
+            right = VerifySquenceOfBST(Arrays.copyOfRange(sequence, i, sequence.length - 1));
+        }
+
+        return left && right;
+    }
+
+    public static void main(String[] args) {
+//        int [] ints = new int[]{3,6,7,5};
+//
+//        int i= 0;
+//        int root = ints[ints.length - 1];
+//        for (i = 0; i < ints.length - 1; i++) {
+//            if (ints[i] > root)
+//                break;
+//        }
+//        System.out.println(i);
+
+        List<Integer> integers = new ArrayList<>();
+        integers.add(1);
+        integers.add(2);
+        integers.add(3);
+        integers.add(4);
+        // 队列 先进先出
+        System.out.println(integers.remove(0));
+    }
+
+    /**
+     * 输入两棵二叉树A，B，判断B是不是A的子结构。（ps：我们约定空树不是任意一个树的子结构）
+     * 这题看似简单，其实有点绕，得好好理解
+     */
+
+    //遍历大树
+    public boolean HasSubtree(TreeNode root1,TreeNode root2) {
+        // 1、当两棵树有一颗为空，或者两棵树遍历完了，至少有一颗为空的时候，均为false;
+        if (root1 == null || root2 == null) {
+            return false;
+        }
+
+        // 2、当有一个值开始相等时，才开始判断这两棵树的子树的值是不是也都一一相等；否则，递归找到第一个相等的值，
+        //  如果找不到，当递归进行到第一步时，就结束了。
+        if (root1.val == root2.val) {
+            // 这里不能直接 return judge(root1, root2); 的原因是，题目没有说明A，B两棵树的值不可重复
+            if (judge(root1, root2)) {
+                return true;
+            }
+        }
+
+        return HasSubtree(root1.left, root2) || HasSubtree(root1.right, root2);
+    }
+
+    // 判断是否是子结构
+    public boolean judge(TreeNode root, TreeNode subtree) {
+        // 子结构循环完毕，期间没有返回false，说明全部匹配
+        if (subtree == null) {
+            return true;
+        }
+
+        // 大树已经循环完毕，而子树还有结点，说明没有匹配成功
+        if (root == null) {
+            return false;
+        }
+
+        if (root.val == subtree.val) {
+            // 相等后判断左右孩子结点
+            return judge(root.left, subtree.left) && judge(root.right, subtree.right);
+        }
+        return false;
+    }
+
+    /**
+     * 给定一棵二叉搜索树，请找出其中的第k小的结点。例如， （5，3，7，2，4，6，8）中，按结点数值大小顺序第三小结点的值为4。
+     * 解： 二叉搜索树： 左子树都比根小，右子树都比根大；中序遍历打印一下，就是排好序的树结点值大小；
+     */
+
+    List<TreeNode> integers = new ArrayList<>();
+    TreeNode KthNode(TreeNode pRoot, int k)
+    {
+        OrderTraversal(pRoot);
+        if (k > integers.size() || k < 1){
+            return null;
+        }
+        return integers.get(k - 1);
+    }
+
+    // 中序遍历
+    public void OrderTraversal(TreeNode node) {
+        if (node == null) return;
+        OrderTraversal(node.left);
+        integers.add(node);
+        OrderTraversal(node.right);
     }
 
 }

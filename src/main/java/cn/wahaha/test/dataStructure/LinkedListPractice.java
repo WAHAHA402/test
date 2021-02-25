@@ -1,6 +1,7 @@
 package cn.wahaha.test.dataStructure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
 
 /**
@@ -22,9 +23,9 @@ public class LinkedListPractice {
         }
     }
 
-    //输入两个链表，找出它们的第一个公共结点
-    //解法一： 蛮力法，循环便利，时间复杂度为O(m*n)
-    public ListNode FindFirstCommonNode1(ListNode pHead1, ListNode pHead2) {
+    // 输入两个链表，找出它们的第一个公共结点
+    // 解法一： 蛮力法，循环便利，时间复杂度为O(m*n) 不推荐
+    public ListNode FindFirstCommonNode(ListNode pHead1, ListNode pHead2) {
         if (pHead1 == null || pHead2 == null) {
             return null;
         }
@@ -42,8 +43,10 @@ public class LinkedListPractice {
         return null;
     }
 
-    //解法二： java只有值引用
-    public ListNode FindFirstCommonNode(ListNode pHead1, ListNode pHead2) {
+    // 解法二： 求出两个链表的长度，长的先走多出的几步，然后开始同时走，如果有相同的结点，则一定会再相遇
+    //          时间负责度是O(m + n)
+    // java只有值引用
+    public ListNode FindFirstCommonNode1(ListNode pHead1, ListNode pHead2) {
         if (pHead1 == null || pHead2 == null) {
             return null;
         }
@@ -82,6 +85,9 @@ public class LinkedListPractice {
         return listNode;
     }
 
+    /**
+     * 这个解法跟上面那个方法是一个意思
+     */
     public ListNode FindFirstCommonNode2(ListNode pHead1, ListNode pHead2) {
         if (pHead1 == null || pHead2 == null) return null;
         int lenth1 = 0;
@@ -117,13 +123,45 @@ public class LinkedListPractice {
         return null;
     }
 
-    //求链表中环的入口结点
-    public ListNode EntryNodeOfLoop(ListNode pHead) {
-        if (pHead == null) {
-            return null;
+    /**
+     * 解法三： 等于将两个链表串联起来了，两个指针要遍历的链表长度就一样了；
+     *  注意： 这里终止条件是，找到相同的结点了；或者没有找到，两个列表的值同步变成空（这点是比较费脑的）
+     *  看下面的链表例子：
+     * 0-1-2-3-4-5-null
+     * a-b-4-5-null
+     * 下面代码里的的if语句，对于某个指针p1来说，其实就是让它跑了连接好的的链表，长度就变成一样了。
+     * 如果有公共结点，那么指针一起走到末尾的部分，也就一定会重叠。看看下面指针的路径吧。
+     * p1： 0-1-2-3-4-5-null-a-b-4-5-null
+     * p2: a-b-4-5-null-0-1-2-3-4-5-null
+     * 因此，两个指针所要遍历的链表就长度一样了！
+     * 如果两个链表存在公共结点，那么p1就是该结点，如果不存在那么p1将会是null。
+     */
+    public ListNode FindFirstCommonNode3(ListNode pHead1, ListNode pHead2) {
+        if(pHead1 == null || pHead2 == null) return null;
+
+        ListNode head1 = pHead1;
+        ListNode head2 = pHead2;
+        while (head1 != head2) {
+            head1 = head1.next;
+            head2 = head2.next;
+
+            if (head1 != head2) {
+                if (head1 == null) head1 = pHead2;
+                if (head2 == null) head2 = pHead1;
+            }
         }
+
+        return head1;
+    }
+
+    // 求链表中环的入口结点
+    // 这题有个理论，直接看题解最好，简单明了，不值得花时间自己思考
+    public ListNode EntryNodeOfLoop(ListNode pHead) {
+        if (pHead == null) return null;
+
         ListNode fast = pHead;
         ListNode slow = pHead;
+
         while (fast != null && fast.next != null) {
             fast = fast.next.next;
             slow = slow.next;
@@ -131,15 +169,17 @@ public class LinkedListPractice {
                 break;
             }
         }
-        if (fast == null || fast.next == null) {
-            return null;
-        }
+
+        if (fast == null || fast.next == null) return null;
+
         fast = pHead;
         while (fast != slow) {
             fast = fast.next;
             slow = slow.next;
         }
+
         return fast;
+
     }
 
     //输入一个链表，反转链表后，输出新链表的表头。
@@ -165,6 +205,26 @@ public class LinkedListPractice {
         return head;
     }
 
+    // 解法2： 这个解法相对于上面那个更加简单一些，不需要多保存一个当前结点；
+    //      核心思路在于，画图，保存好改变指向会丢失的下一个结点，再遍历就行，仅此而已
+    public ListNode ReverseList2(ListNode head) {
+       if (head == null || head.next == null) {
+           return head;
+       }
+
+       ListNode previous = null;
+       ListNode next = head.next;
+
+       while(head != null) {
+           next = head.next;
+           head.next = previous;
+           previous = head;
+           head = next;
+       }
+
+       return previous;
+    }
+
     //解法2： 递归解法
     public ListNode ReverseList(ListNode head) {
         if (head == null || head.next == null) {
@@ -177,14 +237,15 @@ public class LinkedListPractice {
         return reversedList;
     }
 
-    //合并两个单调递增的链表，同时保证合并后的链表满足单调不减原则
+    // 合并两个单调递增的链表，同时保证合并后的链表满足单调不减原则
     public ListNode Merge(ListNode list1, ListNode list2) {
-        if (list1 == null) {
-            return list2;
-        }
-        if (list2 == null) {
-            return list1;
-        }
+        // 有没有发现，这段代码，在方法末尾其实重复了，所以这里可以去掉，但是这个第一步验证的思想还是要有
+//        if (list1 == null) {
+//            return list2;
+//        }
+//        if (list2 == null) {
+//            return list1;
+//        }
         //此处设置一个哨兵结点
         ListNode guard = new ListNode(-1);
         ListNode current = guard;
@@ -207,40 +268,53 @@ public class LinkedListPractice {
             current.next = list1;
         }
         return guard.next;
+
     }
 
     //解法二：递归版本
     public ListNode Merge2(ListNode list1, ListNode list2) {
-        if (list1 == null) {
-            return list2;
-        }
-        if (list2 == null) {
-            return list1;
-        }
-        if (list1.val <= list2.val) {
+//        if (list1 == null) {
+//            return list2;
+//        }
+//        if (list2 == null) {
+//            return list1;
+//        }
+//        if (list1.val <= list2.val) {
+//            list1.next = Merge2(list1.next, list2);
+//            return list1;
+//        } else {
+//            list2.next = Merge2(list1, list2.next);
+//            return list2;
+//        }
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+
+        if (list1.val < list2.val) {
             list1.next = Merge2(list1.next, list2);
             return list1;
         } else {
-            list2.next = Merge2(list1, list2.next);
+            list2.next = Merge2(list2.next, list1);
             return list2;
         }
 
     }
 
-    //输入一个链表，按链表从尾到头的顺序返回一个ArrayList。
-    ArrayList<Integer> arrayList = new ArrayList<>();
+    //输入一个链表，按链表从尾到头的顺序返回一个ArrayList
 
     public ArrayList<Integer> printListFromTailToHead(ListNode listNode) {
+        ArrayList<Integer> integers = new ArrayList<>();
+        if (listNode == null) return integers;
+
         Stack<Integer> stack = new Stack<>();
         while (listNode != null) {
             stack.push(listNode.val);
             listNode = listNode.next;
         }
-        while (!stack.isEmpty()) {
-            arrayList.add(stack.pop());
+        while (!stack.empty()) {
+            integers.add(stack.pop());
         }
 
-        return arrayList;
+        return integers;
     }
 
     public class RandomListNode {
@@ -260,7 +334,7 @@ public class LinkedListPractice {
             return null;
         }
         RandomListNode currentNode = pHead;
-        //新增每个节点，插入原节点与其next节点之间，如原来是A->B->C 变成A->A'->B->B'->C->C'
+        // 1、新增每个节点，插入原节点与其next节点之间，如原来是A->B->C 变成A->A'->B->B'->C->C'
         while (currentNode != null) {
             RandomListNode newNode = new RandomListNode(currentNode.label);
             newNode.next = currentNode.next;
@@ -269,7 +343,7 @@ public class LinkedListPractice {
         }
 
         currentNode = pHead;
-        //为每个新增的节点复制random节点
+        // 2、为每个新增的节点复制random节点
         while (currentNode != null) {
             if (currentNode.random != null) {
                 currentNode.next.random = currentNode.random.next;
@@ -277,7 +351,7 @@ public class LinkedListPractice {
             currentNode = currentNode.next.next;
         }
 
-        //拆分链表
+        // 3、拆分链表
         currentNode = pHead;
         RandomListNode newHead = pHead.next;
         RandomListNode currentNewNode = newHead;
@@ -294,20 +368,73 @@ public class LinkedListPractice {
         return newHead;
     }
 
-    //输入一个链表，输出该链表中倒数第k个结点。
+    // 相较于上面那个最优但是最难写出来的解，下面这个方法，利用了hashmap保存映射关系，增加了一个空间复杂度O(n)，但是很好写啊！！！
+    public RandomListNode Clone_V2(RandomListNode pHead) {
+        if (pHead == null) {
+            return null;
+        }
+
+        RandomListNode current = pHead;
+        HashMap<RandomListNode, RandomListNode> map = new HashMap<>();
+
+        while(current != null) {
+            RandomListNode node = new RandomListNode(current.label);
+            map.put(current, node);
+            current = current.next;
+        }
+
+        current = pHead;
+        while (current != null) {
+            RandomListNode node = map.get(current);
+            if (current.next != null){
+                node.next = map.get(current.next);
+            }
+            if (current.random != null) {
+                node.random = map.get(current.random);
+            }
+
+            current = current.next;
+        }
+
+        return map.get(pHead);
+
+    }
+
+    // 输入一个链表，输出该链表中倒数第k个结点
+    // 这道题，最容易想到的一种解法是，遍历整个列表，获取长度为n，然后正数第n-k就是那个结点，时间复杂度为O(n)+O(n-k)
+    // 第二种解法，快慢指针法： 第一：快指针先走k步；第二：快慢指针开始每次同时走一步，当快指针走完时，慢指针所在结点即为倒数第k个结点；
+    // 相较于第一种解法，时间复杂度较小；下面是第二种解法的实现
     public ListNode FindKthToTail(ListNode head, int k) {
-        if (head == null || k <= 0) return null;
+//        if (k <= 0 || head == null) {
+//            return null;
+//        }
+//        ListNode ahead = head;
+//        ListNode behind = head;
+//        for (int i = 0; i < k - 1; i++) {
+//            if (ahead.next != null) {
+//                ahead = ahead.next;
+//            } else {
+//                return null;
+//            }
+//        }
+//        while (ahead.next != null) {
+//            ahead = ahead.next;
+//            behind = behind.next;
+//        }
+//        return behind;
+
+        if(k <= 0 || head == null) return null;
         ListNode fast = head;
         ListNode slow = head;
-        while (k - 1 > 0) {
-            if (fast.next != null) {
-                fast = fast.next;
-                k--;
-            } else {
+
+        for (int i = 0; i < k; i++) {
+            if (fast == null) {
                 return null;
             }
+            fast = fast.next;
         }
-        while (fast.next != null) {
+
+        while (fast != null) {
             fast = fast.next;
             slow = slow.next;
         }
@@ -315,30 +442,11 @@ public class LinkedListPractice {
         return slow;
     }
 
-    public ListNode FindKthToTailV2(ListNode head, int k) {
-        if (k <= 0 || head == null) {
-            return null;
-        }
-        ListNode ahead = head;
-        ListNode behind = head;
-        for (int i = 0; i < k - 1; i++) {
-            if (ahead.next != null) {
-                ahead = ahead.next;
-            } else {
-                return null;
-            }
-        }
-        while (ahead.next != null) {
-            ahead = ahead.next;
-            behind = behind.next;
-        }
-        return behind;
-    }
-
     //在一个排序的链表中，存在重复的结点，请删除该链表中重复的结点，重复的结点不保留，返回链表头指针。
     //例如，链表-1->2->3->3->3->4->4->5 处理后为 1->2->5
     public ListNode deleteDuplication(ListNode pHead) {
         if (pHead == null || pHead.next == null) return pHead;
+        //添加哨兵结点，以方便碰到第一个，第二个节点就相同的情况
         ListNode guard = new ListNode(-1);
         guard.next = pHead;
 
@@ -361,15 +469,13 @@ public class LinkedListPractice {
     }
 
     public ListNode deleteDuplicationV2(ListNode pHead) {
-        if (pHead == null || pHead.next == null) {
-            return pHead;
-        }
-        //添加哨兵结点，以方便碰到第一个，第二个节点就相同的情况
+        if (pHead == null || pHead.next == null) return pHead;
+
         ListNode guard = new ListNode(-1);
         guard.next = pHead;
 
         ListNode pre = guard;
-        ListNode last = pHead;
+        ListNode last = guard.next;
         while (last != null) {
             if (last.next != null && last.val == last.next.val) {
                 while (last.next != null && last.val == last.next.val) {
@@ -378,9 +484,8 @@ public class LinkedListPractice {
                 pre.next = last.next;
                 last = last.next;
             } else {
-                last = last.next;
                 pre = pre.next;
-
+                last = last.next;
             }
         }
 
