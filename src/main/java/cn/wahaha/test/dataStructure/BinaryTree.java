@@ -450,7 +450,7 @@ public class BinaryTree {
         if (strings[index].equals("#")) {
             return null;
         }
-        TreeNode treeNode = new TreeNode(Integer.valueOf(strings[index]));
+        TreeNode treeNode = new TreeNode(Integer.parseInt(strings[index]));
         treeNode.left = Deserialize(str);
         treeNode.right = Deserialize(str);
         return treeNode;
@@ -592,10 +592,10 @@ public class BinaryTree {
 
         boolean left = true, right = true;
         if (i > 0) {
-            left = VerifySquenceOfBST(Arrays.copyOfRange(sequence, 0, i));
+            left = VerifySquenceOfBSTV2(Arrays.copyOfRange(sequence, 0, i));
         }
         if (i < sequence.length - 1) {
-            right = VerifySquenceOfBST(Arrays.copyOfRange(sequence, i, sequence.length - 1));
+            right = VerifySquenceOfBSTV2(Arrays.copyOfRange(sequence, i, sequence.length - 1));
         }
 
         return left && right;
@@ -685,6 +685,7 @@ public class BinaryTree {
         OrderTraversal(node.left);
         integers.add(node);
         OrderTraversal(node.right);
+//        new ArrayList<>().remove();
     }
 
 }

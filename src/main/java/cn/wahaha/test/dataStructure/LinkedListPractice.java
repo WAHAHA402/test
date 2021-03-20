@@ -213,11 +213,13 @@ public class LinkedListPractice {
        }
 
        ListNode previous = null;
-       ListNode next = head.next;
+       ListNode next = null;
 
        while(head != null) {
+           // 1、变换指针指示方向
            next = head.next;
            head.next = previous;
+           // 2、往后移动
            previous = head;
            head = next;
        }
@@ -375,14 +377,15 @@ public class LinkedListPractice {
         }
 
         RandomListNode current = pHead;
+        // 1、使用一个map来保存当前结点与复制结点的映射关系
         HashMap<RandomListNode, RandomListNode> map = new HashMap<>();
-
         while(current != null) {
             RandomListNode node = new RandomListNode(current.label);
             map.put(current, node);
             current = current.next;
         }
 
+        // 2、为复制出来的结点赋值
         current = pHead;
         while (current != null) {
             RandomListNode node = map.get(current);
@@ -396,6 +399,7 @@ public class LinkedListPractice {
             current = current.next;
         }
 
+        // 3、返回复制链表的头结点
         return map.get(pHead);
 
     }
@@ -493,12 +497,15 @@ public class LinkedListPractice {
     }
 
     public static void main(String[] args) {
-        System.out.println(-3 % 2);
-        System.out.println(3 % -2);
+//        System.out.println(-3 % 2);
+//        System.out.println(3 % -2);
+//
+//        System.out.println(-2 % 12);
+//        System.out.println(-20 % 12);
 
-        System.out.println(-2 % 12);
-        System.out.println(-20 % 12);
     }
+
+
 
 
 }
