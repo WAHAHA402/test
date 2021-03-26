@@ -131,7 +131,7 @@ public class StackPractice {
     // 字符串解码
     int ptr;
     public String decodeString(String s) {
-        LinkedList<String> stack = new LinkedList<>();
+        LinkedList<String> stack =  new LinkedList<>();
         ptr = 0;
 
         while (ptr < s.length()) {
