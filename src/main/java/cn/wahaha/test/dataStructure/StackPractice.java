@@ -128,5 +128,62 @@ public class StackPractice {
         return ans;
     }
 
+    // 字符串解码
+    int ptr;
+    public String decodeString(String s) {
+        LinkedList<String> stack = new LinkedList<>();
+        ptr = 0;
+
+        while (ptr < s.length()) {
+            char cur = s.charAt(ptr);
+            if (Character.isDigit(cur)) {
+                String digits = getDigits(s);
+                stack.addLast(digits);
+            } else if (Character.isLetter(cur) || '[' == cur) {
+                stack.addLast(String.valueOf(cur));
+                ptr++;
+            } else {
+                ptr++;
+                LinkedList<String> subStack = new LinkedList<>();
+                while(!"[".equals(stack.peekLast())) {
+                    subStack.addLast(stack.pollLast());
+                }
+                Collections.reverse(subStack);
+                // 左括号出栈
+                stack.pollLast();
+                // 数字出栈
+                int repeatTime = Integer.parseInt(stack.pollLast());
+                StringBuffer stringBuffer = new StringBuffer();
+                String subString = getString(subStack);
+                // 构造字符串
+                while (repeatTime > 0) {
+                    stringBuffer.append(subString);
+                    repeatTime--;
+                }
+                stack.addLast(stringBuffer.toString());
+
+            }
+        }
+
+        return  getString(stack);
+    }
+
+    public String getDigits(String s) {
+        StringBuffer ret = new StringBuffer();
+        while (Character.isDigit(s.charAt(ptr))) {
+            ret.append(s.charAt(ptr));
+            ptr++;
+        }
+        return ret.toString();
+    }
+
+    public String getString(LinkedList<String> strings) {
+        StringBuffer ret = new StringBuffer();
+        for(String s : strings) {
+            ret.append(s);
+        }
+        return ret.toString();
+    }
+
 
 }
