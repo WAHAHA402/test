@@ -176,7 +176,7 @@ public class BinaryTree {
         // 3 右节点为空，（不包含跟节点）父节点不为空，当前节点为父节点的右结点，向上遍历找到父结点为其本人父节点的左节点，此时下一结点为其本身的父结点
         if (pNode.next != null) {
             pNode = pNode.next;
-            while (pNode.next != null && pNode == pNode.next.right) {
+            while (pNode.next != null && pNode == pNode.next.left) {
                 pNode = pNode.next;
             }
             return pNode.next;
@@ -320,6 +320,7 @@ public class BinaryTree {
 
         FindPathV2(root.left, target);
         FindPathV2(root.right, target);
+        list.remove(list.size() - 1);
 
         return result;
     }
@@ -601,25 +602,7 @@ public class BinaryTree {
         return left && right;
     }
 
-    public static void main(String[] args) {
-//        int [] ints = new int[]{3,6,7,5};
-//
-//        int i= 0;
-//        int root = ints[ints.length - 1];
-//        for (i = 0; i < ints.length - 1; i++) {
-//            if (ints[i] > root)
-//                break;
-//        }
-//        System.out.println(i);
 
-        List<Integer> integers = new ArrayList<>();
-        integers.add(1);
-        integers.add(2);
-        integers.add(3);
-        integers.add(4);
-        // 队列 先进先出
-        System.out.println(integers.remove(0));
-    }
 
     /**
      * 输入两棵二叉树A，B，判断B是不是A的子结构。（ps：我们约定空树不是任意一个树的子结构）
@@ -685,7 +668,26 @@ public class BinaryTree {
         OrderTraversal(node.left);
         integers.add(node);
         OrderTraversal(node.right);
-//        new ArrayList<>().remove();
+    }
+
+    public static void main(String[] args) {
+//        int [] ints = new int[]{3,6,7,5};
+//
+//        int i= 0;
+//        int root = ints[ints.length - 1];
+//        for (i = 0; i < ints.length - 1; i++) {
+//            if (ints[i] > root)
+//                break;
+//        }
+//        System.out.println(i);
+
+        List<Integer> integers = new LinkedList<>();
+        integers.add(1);
+        integers.add(2);
+        integers.add(3);
+        integers.add(4);
+        // 队列 先进先出
+        System.out.println(integers.remove(0));
     }
 
 }

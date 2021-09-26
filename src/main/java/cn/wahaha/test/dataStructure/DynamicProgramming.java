@@ -176,4 +176,54 @@ public class DynamicProgramming {
         return min;
     }
 
+    // 题目： 最长回文子串
+    // 最最重要的是理解状态转移方程
+
+    public String longestPalindrome(String s) {
+        int len = s.length();
+        if (len < 2) {
+            return s;
+        }
+
+        int maxLen = 1;
+        int begin = 0;
+        // 1. 状态定义
+        // dp[i][j] 表示s[i...j] 是否是回文串
+
+        // 2.初始化
+        boolean[][] dp = new boolean[len][len];
+        for (int i = 0; i < len; i++) {
+            dp[i][i] = true;
+        }
+
+        char[] chars = s.toCharArray();
+        //3.状态转移
+        // 先填右上角，原答案说先填左下角，我完全没明白
+        // 填表规则：先一列一列填，再一行一行填
+        for (int j = 1; j < len; j++) {
+            for (int i = 0; i < j; i++) {
+                // 头尾字符不相等，不是回文
+                if (chars[i] != chars[j]) {
+                    dp[i][j] = false;
+                } else {
+                    // 头尾之间没有字符串剩余 j - i == 1; 或者只剩一个，j-i == 2，都是回文
+                    if (j - i < 3) {
+                        dp[i][j] = true;
+                    } else {
+                        // 状态转移
+                        // abcdcba 举个例子，这里两个a相等，是不是回文取决于两个a里面的字符串是不是回文
+                        dp[i][j] = dp[i + 1][j - 1];
+                    }
+                }
+
+                // 上述如果相等，则判断是否要更新回文子串长度和起始位置
+                if (dp[i][j] && (j - i + 1) > maxLen) {
+                    maxLen = j - i + 1;
+                    begin = i;
+                }
+            }
+        }
+
+        return s.substring(begin, maxLen + begin);
+    }
 }
