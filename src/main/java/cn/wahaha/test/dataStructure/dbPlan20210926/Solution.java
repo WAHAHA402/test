@@ -3,6 +3,7 @@ package cn.wahaha.test.dataStructure.dbPlan20210926;
 import java.util.Map;
 
 public class Solution {
+    // ======================== 第一天 ========================
     // 斐波那契数列
     public int fib(int n) {
         if (n == 0) return 0;
@@ -33,6 +34,7 @@ public class Solution {
         return d;
     }
 
+    // ======================== 第二天 ========================
     /**爬楼梯：
      * 假设你正在爬楼梯。需要 n 阶你才能到达楼顶。
      * 每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？
@@ -67,6 +69,7 @@ public class Solution {
         return dp[n];
     }
 
+    // ======================== 第三天 ========================
     /**
      * 打家劫舍
      * https://leetcode-cn.com/problems/house-robber/
@@ -112,6 +115,66 @@ public class Solution {
         }
         return dpCurrent;
     }
+
+    /** 删除并获得点数
+     * https://leetcode-cn.com/problems/delete-and-earn/
+     */
+    public int deleteAndEarn(int[] nums) {
+        int maxVal = 0;
+        for (int i = 0; i < nums.length; i++) {
+            maxVal = Math.max(maxVal, nums[i]);
+        }
+        // 灵魂操作，对每个相同数字进行求和。
+        int[] sum = new int[maxVal + 1];
+        for (int val: nums) {
+            sum[val] += val;
+        }
+        return rob(sum);
+    }
+
+    /**
+     * 跳跃游戏
+     * https://leetcode-cn.com/problems/jump-game/
+     */
+    public boolean canJump(int[] nums) {
+        int rightMost = nums[0] + 0;
+        int len = nums.length;
+        for (int i = 0; i < len; i++) {
+            if (i <= rightMost) {
+                rightMost = Math.max(rightMost, i + nums[i]);
+                if (rightMost >= len - 1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+
+    }
+
+    /**
+     * 跳跃游戏 II : 注意，这里总是能跳到最后的位置！不用考虑！
+     * https://leetcode-cn.com/problems/jump-game-ii/
+     */
+    public int jump(int[] nums) {
+        int len = nums.length;
+        int end = 0, step = 0;
+        int rightMost = nums[0] + 0;
+        for (int i = 0; i < len - 1; i++) {
+            rightMost = Math.max(rightMost, i + nums[i]);
+            if (end == i) {
+                step++;
+                end = rightMost;
+            }
+        }
+        return step;
+    }
+
+
+
+
+
+
+
 
 
 
