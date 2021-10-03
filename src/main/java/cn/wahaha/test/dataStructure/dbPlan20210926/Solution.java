@@ -1,7 +1,11 @@
 package cn.wahaha.test.dataStructure.dbPlan20210926;
 
 import java.util.Map;
-
+/**
+ * @Author zhangrenwei
+ * @Description leetcode 学习计划之----21天动态规划
+ * @Date 2021/10/3 11:14 下午
+ **/
 public class Solution {
     // ======================== 第一天 ========================
     // 斐波那契数列
@@ -171,10 +175,113 @@ public class Solution {
     }
 
     // ======================== 第五天 ========================
+    /**
+     * 最大子序和
+     * https://leetcode-cn.com/problems/maximum-subarray/
+     */
+    public int maxSubArray(int[] nums) {
+        int len = nums.length;
+        if (len <= 0) return -1;
 
+        int maxSum = nums[0];
+        int[] dp = new int[len];
+        dp[0] = nums[0];
 
+        for (int i = 1; i < len; i++) {
+            dp[i] = Math.max(dp[i-1] + nums[i], nums[i]);
+            maxSum = Math.max(maxSum, dp[i]);
+        }
+
+        return maxSum;
+    }
+
+    /**
+     *  环形子数组的最大和
+     *  https://leetcode-cn.com/problems/maximum-sum-circular-subarray/
+     *  直接两种情况，
+     *  1：最大数组和在中间，和平时一样解法
+     *  2：最大数组和是跨越头尾，从两边出发往中间靠拢必须都是最大，那就说明中间段就是最小，找最小，用和减去最小得到最大。
+     *  3、两步得到的最大取更大的
+     */
+    public int maxSubarraySumCircular(int[] nums) {
+        int dp = nums[0], max1 = nums[0], sum = nums[0];
+        int len = nums.length;
+        for (int i = 1; i < len; i++) {
+            sum += nums[i];
+            dp = Math.max(nums[i], nums[i] + dp);
+            max1 = Math.max(dp, max1);
+        }
+
+        int max2 = 0, min2 = 0;
+        dp = nums[0];
+        for (int i = 1; i < len; i++) {
+            dp = Math.min(nums[i], dp + nums[i]);
+            min2 = Math.min(dp, min2);
+        }
+        max2 = sum - min2;
+        // 这里有个坑，如果元素全是负数，将得到 max2 = 0，就出问题了
+        if (max2 == 0) {
+            return max1;
+        }
+
+        return Math.max(max1, max2);
+    }
 
     // ======================== 第六天 ========================
+
+    /**
+     * 乘积最大子数组
+     * https://leetcode-cn.com/problems/maximum-product-subarray/
+     */
+    public int maxProduct(int[] nums) {
+        int len = nums.length;
+        int curMax = nums[0], curMin = nums[0], max = nums[0];
+        for (int i = 1; i < len; i++) {
+            int curMaxTemp = curMax;
+            int curMinTemp = curMin;
+            curMax = Math.max(Math.max(curMaxTemp * nums[i], nums[i]), curMinTemp * nums[i]);
+            curMin = Math.min(Math.min(curMaxTemp * nums[i], nums[i]), curMinTemp * nums[i]);
+            max = Math.max(max, curMax);
+        }
+
+        return max;
+    }
+
+    /**
+     * 乘积为正数的最长子数组长度
+     * https://leetcode-cn.com/problems/maximum-length-of-subarray-with-positive-product/
+     * 解： 上面的题，加这道题，用数组来解题是比较好的，但是状态转移方程，当前状态只与前一个状态有关，所以我们利用滚动数组的思想，
+     *      只借用两个变量，滚动使用。
+     */
+    public int getMaxLen(int[] nums) {
+        int len = nums.length;
+        int positive = 0, negative = 0, maxLength = 0;
+        if (nums[0] > 0) {
+            positive++;
+            maxLength++;
+        } else if (nums[0] < 0) {
+            negative++;
+        }
+
+        for (int i = 1; i < len; i++) {
+            if (nums[i] > 0) {
+                positive++;
+                negative = negative > 0 ? negative + 1 : 0;
+            } else if (nums[i] < 0) {
+                int posTemp = positive;
+                int negTemp = negative;
+                negative = posTemp + 1;
+                positive = negTemp > 0 ? negTemp + 1 : 0;
+            } else {
+                negative = 0;
+                positive = 0;
+            }
+
+            maxLength = Math.max(maxLength, positive);
+        }
+
+        return maxLength;
+    }
 
     // ======================== 第七天 ========================
 
