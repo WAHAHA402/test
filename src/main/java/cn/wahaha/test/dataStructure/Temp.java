@@ -90,7 +90,7 @@ public class Temp {
     ////        }
 
     public void getRandomPK() {
-        int[] temp = new int[100];
+        int[] temp  = new int[100];
         // 初始化略过
         int[] result = new int[100];
 
