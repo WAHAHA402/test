@@ -12,9 +12,9 @@ import java.util.concurrent.TimeUnit;
  */
 //todo 默认情况下 CompletableFuture 使用的几个静态方法公用一个默认的线程池，不可取，一般要视情况，使用同名的带有线程池参数的方法，以避免互相干扰！！！
 public class CompletableFutureTest {
-    public static void sleepSeconds(int t) {
+    public static void sleepMilliSeconds(int t) {
         try {
-            TimeUnit.SECONDS.sleep(t);
+            TimeUnit.MILLISECONDS.sleep(t);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -33,26 +33,26 @@ public class CompletableFutureTest {
     public static void chuanHangGuanXi() {
         CompletableFuture<String> f2 = CompletableFuture.supplyAsync(() -> {
             System.out.println("T2: 洗茶壶。。。");
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
 
             System.out.println("T2: 洗茶杯。。。");
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
 
             System.out.println("T2: 拿茶叶。。。");
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
             return "龙井";
         });
 
         //串行关系
         CompletableFuture<Void> f4 = f2.thenApply(tea -> {
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
             System.out.println("f4 thenApply: " + tea);
             return tea;
         }).thenAccept(tea -> {
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
             System.out.println("f4 thenAccept: " + tea);
         }).thenRun(() -> {
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
             System.out.println("f4 thenRun");
         });
 
@@ -62,22 +62,22 @@ public class CompletableFutureTest {
     //And汇聚关系
     public static void huiJuGuanXi_AND() {
         CompletableFuture<String> f1 = CompletableFuture.supplyAsync(() -> {
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
             System.out.println("T1： 洗水壶。。。");
 
-            sleepSeconds(5);
+            sleepMilliSeconds(5000);
             System.out.println("T1： 烧开水。。。");
             return "这是烧好的开水";
         });
 
         CompletableFuture<String> f2 = CompletableFuture.supplyAsync(() -> {
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
             System.out.println("T2: 洗茶壶。。。");
 
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
             System.out.println("T2: 洗茶杯。。。");
 
-            sleepSeconds(1);
+            sleepMilliSeconds(1000);
             System.out.println("T2: 拿茶叶。。。");
             return "龙井";
         });
@@ -97,12 +97,12 @@ public class CompletableFutureTest {
     public static void huiJuGuanXi_OR() {
         CompletableFuture<String> f1 = CompletableFuture.supplyAsync(() -> {
             int i = new Random().nextInt(8);
-            sleepSeconds(i);
+            sleepMilliSeconds(i * 1000);
             return "f1: " + i;
         });
         CompletableFuture<String> f2 = CompletableFuture.supplyAsync(() -> {
             int i = new Random().nextInt(8);
-            sleepSeconds(i);
+            sleepMilliSeconds(i * 1000);
             return "f2: " + i;
         });
         CompletableFuture<String> f3 = f1.applyToEither(f2, f1OrF2ResultString -> f1OrF2ResultString);
@@ -119,29 +119,38 @@ public class CompletableFutureTest {
     public static void handleException() {
         CompletableFuture<Integer> future0 = CompletableFuture
                 .supplyAsync(() -> 7/14)
+                // 拿到上一步结果或异常信息，不抛出异常
                 .whenComplete((resultValueFromLastStep, thisIsException) -> {
+                    sleepMilliSeconds(0);
                     System.out.println("7/14 will not go wrong, result is \"" + resultValueFromLastStep + "\", exception is " + thisIsException);
                 });
 
         CompletableFuture<Integer> future1 = CompletableFuture
                 .supplyAsync(() -> 7/0)
+                // 拿到上一步结果或异常信息，不抛出异常
                 .whenComplete((resultValueFromLastStep, thisIsException) -> {
+                    sleepMilliSeconds(500);
                     System.out.println("7/0 will go wrong, result is \"" + resultValueFromLastStep + "\", exception is \"" + thisIsException + "\"");
                 });
 
         CompletableFuture<Integer> future2 = CompletableFuture
                 .supplyAsync(() -> 7/0)
+                // 当异常发生时，返回新的结果，不抛出异常
                 .exceptionally(exception -> {
+                    sleepMilliSeconds(1000);
                     int newResult = 1;
-                    System.out.println("7/0 will go wrong, result is \"" + exception + "\", so we use \"" + newResult + "\" to replace");
+                    System.out.println("7/0 will go wrong, exception is \"" + exception + "\", so we use \"" + newResult + "\" to replace");
                     return newResult;
                 });
 
         CompletableFuture<Integer> future3 = CompletableFuture
                 .supplyAsync(() -> 7/0)
+                // 拿到返回的结果和异常信息（两者一般只会存在一个非空），返回函数执行后的结果
                 .handle((resultValueFromLastStep, thisIsException) -> {
-                    System.out.println("7/0 will go wrong, result is \"" + resultValueFromLastStep + "\", exception is \"" + thisIsException + "\"" + ", we re");
-                    return 10000;
+                    sleepMilliSeconds(1500);
+                    int newResult = 1000;
+                    System.out.println("7/0 will go wrong, result is \"" + resultValueFromLastStep + "\", exception is \"" + thisIsException + "\"" + ", so we use \"" + newResult + "\" to replace");
+                    return newResult;
                 });
 
         }
